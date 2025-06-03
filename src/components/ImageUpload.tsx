@@ -1,5 +1,5 @@
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Camera, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -31,6 +31,7 @@ const ImageUpload = ({ onImageSelect, selectedImage, onClearImage }: ImageUpload
 
   const startCamera = async () => {
     try {
+      console.log("Requesting camera access...");
       const mediaStream = await navigator.mediaDevices.getUserMedia({ 
         video: { 
           facingMode: 'environment',
@@ -38,12 +39,21 @@ const ImageUpload = ({ onImageSelect, selectedImage, onClearImage }: ImageUpload
           height: { ideal: 720 }
         } 
       });
+      
+      console.log("Camera stream obtained:", mediaStream);
       setStream(mediaStream);
       setIsCapturing(true);
       
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream;
-      }
+      // Wait for the next frame to ensure the video element is rendered
+      setTimeout(() => {
+        if (videoRef.current) {
+          console.log("Setting video source...");
+          videoRef.current.srcObject = mediaStream;
+          videoRef.current.play().catch(error => {
+            console.error("Error playing video:", error);
+          });
+        }
+      }, 100);
       
       toast.success("Camera started! Position your amphibian and tap capture.");
     } catch (error) {
@@ -53,8 +63,12 @@ const ImageUpload = ({ onImageSelect, selectedImage, onClearImage }: ImageUpload
   };
 
   const stopCamera = () => {
+    console.log("Stopping camera...");
     if (stream) {
-      stream.getTracks().forEach(track => track.stop());
+      stream.getTracks().forEach(track => {
+        console.log("Stopping track:", track);
+        track.stop();
+      });
       setStream(null);
     }
     setIsCapturing(false);
@@ -66,7 +80,9 @@ const ImageUpload = ({ onImageSelect, selectedImage, onClearImage }: ImageUpload
       const canvas = canvasRef.current;
       const context = canvas.getContext('2d');
       
-      if (context) {
+      console.log("Capturing photo...", { videoWidth: video.videoWidth, videoHeight: video.videoHeight });
+      
+      if (context && video.videoWidth > 0 && video.videoHeight > 0) {
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
         context.drawImage(video, 0, 0);
@@ -79,9 +95,20 @@ const ImageUpload = ({ onImageSelect, selectedImage, onClearImage }: ImageUpload
             toast.success("Photo captured successfully!");
           }
         }, 'image/jpeg', 0.9);
+      } else {
+        toast.error("Camera not ready. Please wait a moment and try again.");
       }
     }
   };
+
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [stream]);
 
   return (
     <div className="w-full max-w-2xl mx-auto">
@@ -122,24 +149,31 @@ const ImageUpload = ({ onImageSelect, selectedImage, onClearImage }: ImageUpload
       )}
 
       {isCapturing && (
-        <div className="relative">
+        <div className="relative bg-black rounded-xl overflow-hidden">
           <video
             ref={videoRef}
             autoPlay
             playsInline
-            className="w-full rounded-xl shadow-lg"
+            muted
+            className="w-full h-96 object-cover rounded-xl"
+            onLoadedMetadata={() => {
+              console.log("Video metadata loaded");
+            }}
+            onCanPlay={() => {
+              console.log("Video can play");
+            }}
           />
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex space-x-4">
             <Button
               onClick={capturePhoto}
-              className="bg-white text-gray-800 hover:bg-gray-100 px-6 py-3 rounded-full"
+              className="bg-white text-gray-800 hover:bg-gray-100 px-6 py-3 rounded-full shadow-lg"
             >
               <Camera size={20} />
             </Button>
             <Button
               onClick={stopCamera}
               variant="destructive"
-              className="px-6 py-3 rounded-full"
+              className="px-6 py-3 rounded-full shadow-lg"
             >
               <X size={20} />
             </Button>
