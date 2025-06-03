@@ -42,7 +42,20 @@ export const identifyAmphibian = async (imageFile: File): Promise<AmphibianData>
   "behavior": "Key behavioral characteristics"
 }
 
-If you cannot identify the amphibian with confidence, provide your best estimate but indicate uncertainty in the response. Focus on amphibians only - if this is not an amphibian, indicate that in the commonName field.`;
+IMPORTANT: If this is NOT an amphibian (frog, toad, salamander, newt, or caecilian), respond with ONLY this format:
+{
+  "commonName": "Not an amphibian - please upload an amphibian photo",
+  "scientificName": "N/A",
+  "family": "N/A", 
+  "habitat": "N/A",
+  "diet": "N/A",
+  "conservationStatus": "N/A",
+  "geographicRange": "N/A",
+  "size": "N/A",
+  "behavior": "N/A"
+}
+
+Focus only on amphibians. Do not provide detailed descriptions of non-amphibian subjects.`;
 
     const requestBody = {
       contents: [{
