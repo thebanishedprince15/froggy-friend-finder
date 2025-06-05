@@ -1,113 +1,88 @@
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface AmphibianData {
-  commonName: string;
-  scientificName: string;
-  family: string;
-  habitat: string;
-  diet: string;
-  conservationStatus: string;
-  geographicRange: string;
-  size: string;
-  behavior: string;
-}
+import { AmphibianData } from "@/services/geminiService";
+import ShareButton from "./ShareButton";
 
 interface AmphibianResultProps {
   data: AmphibianData;
-  confidence?: number;
   image: string;
 }
 
-const AmphibianResult = ({ data, confidence, image }: AmphibianResultProps) => {
+const AmphibianResult = ({ data, image }: AmphibianResultProps) => {
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6">
-      {/* Image Display */}
-      <Card className="bg-white/80 backdrop-blur-sm">
-        <CardContent className="p-6">
-          <img
-            src={image}
-            alt={data.commonName}
-            className="w-full rounded-lg shadow-lg max-h-96 object-cover"
-          />
-        </CardContent>
-      </Card>
-
-      {/* Identification Results */}
-      <Card className="bg-white/80 backdrop-blur-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center bg-gradient-to-r from-green-600 to-blue-600 bg-clip-text text-transparent">
-            Identification Results
-          </CardTitle>
-          {confidence && (
-            <p className="text-center text-gray-600">
-              Confidence: {Math.round(confidence)}%
-            </p>
-          )}
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <tbody>
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 font-semibold text-gray-700 bg-green-50">
-                    Common Name
-                  </td>
-                  <td className="py-3 px-4 text-gray-900">{data.commonName}</td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 font-semibold text-gray-700 bg-blue-50">
-                    Scientific Name
-                  </td>
-                  <td className="py-3 px-4 text-gray-900 italic">{data.scientificName}</td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 font-semibold text-gray-700 bg-green-50">
-                    Family
-                  </td>
-                  <td className="py-3 px-4 text-gray-900">{data.family}</td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 font-semibold text-gray-700 bg-blue-50">
-                    Habitat
-                  </td>
-                  <td className="py-3 px-4 text-gray-900">{data.habitat}</td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 font-semibold text-gray-700 bg-green-50">
-                    Diet
-                  </td>
-                  <td className="py-3 px-4 text-gray-900">{data.diet}</td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 font-semibold text-gray-700 bg-blue-50">
-                    Conservation Status
-                  </td>
-                  <td className="py-3 px-4 text-gray-900">{data.conservationStatus}</td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 font-semibold text-gray-700 bg-green-50">
-                    Geographic Range
-                  </td>
-                  <td className="py-3 px-4 text-gray-900">{data.geographicRange}</td>
-                </tr>
-                <tr className="border-b border-gray-200">
-                  <td className="py-3 px-4 font-semibold text-gray-700 bg-blue-50">
-                    Size
-                  </td>
-                  <td className="py-3 px-4 text-gray-900">{data.size}</td>
-                </tr>
-                <tr>
-                  <td className="py-3 px-4 font-semibold text-gray-700 bg-green-50">
-                    Behavior
-                  </td>
-                  <td className="py-3 px-4 text-gray-900">{data.behavior}</td>
-                </tr>
-              </tbody>
-            </table>
+    <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-xl overflow-hidden max-w-4xl mx-auto animate-fade-in">
+      {/* Header with image and basic info */}
+      <div className="relative">
+        <img
+          src={image}
+          alt={data.commonName}
+          className="w-full h-64 object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute bottom-4 left-4 right-4">
+          <div className="flex justify-between items-end">
+            <div>
+              <h2 className="text-2xl md:text-3xl font-bold text-white mb-1">
+                {data.commonName}
+              </h2>
+              <p className="text-white/90 italic text-lg">
+                {data.scientificName}
+              </p>
+            </div>
+            <ShareButton data={data} image={image} />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
+
+      {/* Details Table */}
+      <div className="p-6">
+        <h3 className="text-xl font-semibold text-gray-800 mb-4">
+          Amphibian Details
+        </h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Family */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+            <div className="text-sm font-medium text-gray-600">Family</div>
+            <div className="text-lg text-gray-800">{data.family}</div>
+          </div>
+
+          {/* Habitat */}
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg">
+            <div className="text-sm font-medium text-gray-600">Habitat</div>
+            <div className="text-lg text-gray-800">{data.habitat}</div>
+          </div>
+
+          {/* Diet */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+            <div className="text-sm font-medium text-gray-600">Diet</div>
+            <div className="text-lg text-gray-800">{data.diet}</div>
+          </div>
+
+          {/* Conservation Status */}
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg">
+            <div className="text-sm font-medium text-gray-600">Conservation Status</div>
+            <div className="text-lg text-gray-800">{data.conservationStatus}</div>
+          </div>
+
+          {/* Geographic Range */}
+          <div className="bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+            <div className="text-sm font-medium text-gray-600">Geographic Range</div>
+            <div className="text-lg text-gray-800">{data.geographicRange}</div>
+          </div>
+
+          {/* Size */}
+          <div className="bg-gradient-to-r from-blue-50 to-green-50 p-4 rounded-lg">
+            <div className="text-sm font-medium text-gray-600">Size</div>
+            <div className="text-lg text-gray-800">{data.size}</div>
+          </div>
+        </div>
+
+        {/* Behavior - Full Width */}
+        <div className="mt-4 bg-gradient-to-r from-green-50 to-blue-50 p-4 rounded-lg">
+          <div className="text-sm font-medium text-gray-600">Behavior</div>
+          <div className="text-lg text-gray-800">{data.behavior}</div>
+        </div>
+      </div>
     </div>
   );
 };
